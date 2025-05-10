@@ -1,0 +1,174 @@
+<!doctype html>
+<html class="no-js" lang="zxx">
+    <head>
+        <!-- Meta Tags -->
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Title -->
+        <title>MI6</title>
+
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+
+        <!-- CSS Files -->
+        <link rel="stylesheet" href="static/bootstrap.min.css">
+        <link rel="stylesheet" href="static/font-awesome.min.css">
+
+        <style>
+            /* General Styles */
+            body {
+                font-family: 'Roboto', sans-serif;
+                background-color: #f2f8fb;
+                margin: 0;
+                padding: 20px;
+                color: #333;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: auto;
+                padding: 30px;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                text-align: center;
+                color: #005d6a;
+                font-size: 36px;
+                margin-bottom: 20px;
+            }
+
+            h2 {
+                font-size: 28px;
+                color: #005d6a;
+                margin-bottom: 20px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 30px;
+            }
+
+            table th, table td {
+                padding: 12px 15px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            table th {
+                background-color: #0097a7;
+                color: white;
+            }
+
+            /* Button Styles */
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn-upload {
+                background-color: #008c76;
+                color: white;
+            }
+
+            .btn-upload:hover {
+                background-color: #006c5b;
+            }
+
+            .btn-download {
+                background-color: #66bb6a;
+                color: white;
+            }
+
+            .btn-download:hover {
+                background-color: #388e3c;
+            }
+
+            .btn-delete {
+                background-color: #e53935;
+                color: white;
+            }
+
+            .btn-delete:hover {
+                background-color: #c62828;
+            }
+
+            .file-actions {
+                display: flex;
+                align-items: center;
+            }
+
+            .file-actions form {
+                margin-left: 10px;
+            }
+
+            /* Icon Styles */
+            .file-actions .fa {
+                margin-right: 8px;
+            }
+
+            /* Form Styles */
+            input[type="file"] {
+                padding: 8px;
+                margin-right: 10px;
+                border: 2px solid #ddd;
+                border-radius: 5px;
+                background-color: #fafafa;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Medical File Manager</h1>
+            <p style="font-size: 16px; color: #666; text-align: center;">Securely upload, download, and manage medical records with ease.</p>
+
+            <!-- Upload Form -->
+            <form action="/upload" method="POST" enctype="multipart/form-data" style="text-align: center; margin-bottom: 30px;">
+                <input type="file" name="file" required>
+                <button type="submit" class="btn btn-upload">
+                    <i class="fa fa-upload"></i> Upload Medical File
+                </button>
+            </form>
+
+            <!-- Files Table -->
+            <h2>Uploaded Files</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td>{{ file }}</td>
+                        <td class="file-actions">
+                            <a href="/uploads/{{ file }}" class="btn btn-download" target="_blank">
+                                <i class="fa fa-download"></i> Download
+                            </a>
+                            <form action="/delete/{{ file }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-delete">
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- JS Files -->
+        <script src="static/bootstrap.min.js"></script>
+    </body>
+</html>
