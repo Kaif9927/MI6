@@ -22,7 +22,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = "secret_key"  # Replace with a secure key
 
 # --- AES Encryption Utilities ---
-AES_KEY = get_random_bytes(16)  # In production, load this from a secure config
+AES_KEY = load_or_create_aes_key()  # Use this line instead of generating new key
 
 def encrypt_password(plaintext):
     cipher = AES.new(AES_KEY, AES.MODE_GCM)
@@ -44,9 +44,15 @@ def load_users(file):
         return users
     with open(file, "r") as f:
         for line in f:
-            username, encrypted_password = line.strip().split(",")
-            users[username] = encrypted_password
+            parts = line.strip().split(",", 1)  # split only on the first comma
+            if len(parts) == 2:
+                username, encrypted_password = parts
+                users[username] = encrypted_password
+            else:
+                # Optional: log or skip the malformed line
+                print(f"Skipping malformed line in {file}: {line.strip()}")
     return users
+
 
 def save_user(file, username, password):
     encrypted = encrypt_password(password)
@@ -94,7 +100,7 @@ def signup():
         return redirect(url_for('login'))
     return render_template('signup.html')
 
-@app.route("/second-login", methods=["GET", "POST"])
+@app.route('/second-login', methods=['GET', 'POST'])
 def second_login():
     if "pending_user" not in session:
         return redirect(url_for("login"))
@@ -105,14 +111,17 @@ def second_login():
 
         users_B = load_users("users_B.txt")
         if username in users_B:
-            try:
-                if decrypt_password(users_B[username]) == password and username != session["pending_user"]:
+            if username != session["pending_user"]:
+                if decrypt_password(users_B[username]) == password:
+                    session["user_B"] = session["pending_user"]
+                    session.pop("pending_user")
                     return redirect(url_for("hidden_data"))
-            except:
-                return "Decryption failed. Possibly corrupt data."
-
-        return "Invalid second user or same as the first user."
-
+                else:
+                    return "Incorrect password for User B."
+            else:
+                return "User B cannot be the same as the first user."
+        else:
+            return "User B not found. Use sign-up to create."
     return render_template("second_login.html")
 
 @app.route("/index")
@@ -124,9 +133,10 @@ def index():
 
 @app.route("/hidden-data")
 def hidden_data():
-    if "pending_user" in session:
+    if "user_B" in session:
         return render_template("hidden_data.html")
     return redirect(url_for("login"))
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -156,6 +166,15 @@ def delete_file(filename):
         os.remove(file_path)
         return redirect(url_for('index'))
     return "File not found", 404
+
+@app.route('/signup-user-b', methods=['GET', 'POST'])
+def signup_user_b():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        save_user("users_B.txt", username, password)
+        return redirect(url_for('login'))
+    return render_template('signup_user_b.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
